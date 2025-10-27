@@ -3,6 +3,8 @@ from typing import Optional, Tuple, Union
 import napari
 import numpy as np
 
+from PIL import Image
+
 import torch
 
 from .. import util
@@ -120,6 +122,11 @@ def annotator_2d(
 
     napari.run()
 
+    instances = viewer.layers["committed_objects"].data
+
+        # Save the instance segmentation, if 'output_path' provided.
+    Image.fromarray((instances * 255).astype(np.uint8)).save("outputs/annotated.tiff", 'TIFF', quality=100)
+
 
 def main():
     """@private"""
@@ -137,5 +144,5 @@ def main():
         segmentation_result=segmentation_result,
         model_type=args.model_type, tile_shape=args.tile_shape, halo=args.halo,
         precompute_amg_state=args.precompute_amg_state, checkpoint_path=args.checkpoint,
-        device=args.device, prefer_decoder=args.prefer_decoder,
+        device=args.device, prefer_decoder=args.prefer_decoder
     )

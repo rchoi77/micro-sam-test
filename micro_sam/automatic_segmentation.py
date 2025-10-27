@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Union, Tuple
 
 import numpy as np
 import imageio.v3 as imageio
+from PIL import Image
 
 from torch_em.data.datasets.util import split_kwargs
 
@@ -277,7 +278,8 @@ def automatic_instance_segmentation(
     # Before starting to annotate, if at all desired, store the automatic segmentations in the first stage.
     if output_path is not None:
         _output_path = _add_suffix_to_output_path(output_path, "_automatic") if annotate else output_path
-        imageio.imwrite(_output_path, instances, compression="zlib")
+        Image.fromarray((instances * 255).astype(np.uint8)).save(_output_path, 'TIFF', quality=100)
+        #imageio.imwrite(_output_path, instances, compression="zlib")
         if verbose:
             print(f"The automatic segmentation results are stored at '{os.path.abspath(_output_path)}'.")
 
@@ -306,10 +308,11 @@ def automatic_instance_segmentation(
         instances = viewer.layers["committed_objects"].data
 
         # Save the instance segmentation, if 'output_path' provided.
-        if output_path is not None:
-            imageio.imwrite(output_path, instances, compression="zlib")
-            if verbose:
-                print(f"The final segmentation results are stored at '{os.path.abspath(output_path)}'.")
+        #if output_path is not None:
+        #    #imageio.imwrite(output_path, instances, compression="zlib")
+        #    Image.fromarray((instances * 255).astype(np.uint8)).save(output_path, 'TIFF', quality=100)
+        #    if verbose:
+        #        print(f"The final segmentation results are stored at '{os.path.abspath(output_path)}'.")
 
     if return_embeddings:
         return instances, image_embeddings
@@ -394,7 +397,7 @@ def main():
         "--halo", nargs="+", type=int, help="The halo for using tiled prediction.", default=None
     )
     parser.add_argument(
-        "-n", "--ndim", default=None, type=int,
+        "-n", "--ndim", default=2, type=int,
         help="The number of spatial dimensions in the data. Please specify this if your data has a channel dimension."
     )
     parser.add_argument(
