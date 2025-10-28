@@ -202,3 +202,5 @@ clf-test-data
 data/
 embeddings/
 *.zarr
+
+.vscode/

@@ -278,7 +278,15 @@ def automatic_instance_segmentation(
     # Before starting to annotate, if at all desired, store the automatic segmentations in the first stage.
     if output_path is not None:
         _output_path = _add_suffix_to_output_path(output_path, "_automatic") if annotate else output_path
-        Image.fromarray((instances * 255).astype(np.uint8)).save(_output_path, 'TIFF', quality=100)
+        ### CUSTOM COLORING SCRIPT ###
+        colored_instances = np.stack([instances, instances, instances], axis=-1).astype(np.uint8)
+        for i in range(1,len(np.unique(instances)) + 1):
+            rand_color = np.random.randint(0, 255, 3)
+            colored_instances[np.all(colored_instances == [i,i,i], axis=-1)] = rand_color
+        
+        Image.fromarray(colored_instances).save(_output_path, 'TIFF', quality=100)
+        ### END CUSTOM COLORING SCRIPT ###
+        #Image.fromarray((instances * 255).astype(np.uint8)).save(_output_path, 'TIFF', quality=100)
         #imageio.imwrite(_output_path, instances, compression="zlib")
         if verbose:
             print(f"The automatic segmentation results are stored at '{os.path.abspath(_output_path)}'.")
