@@ -278,7 +278,7 @@ def automatic_instance_segmentation(
     # Before starting to annotate, if at all desired, store the automatic segmentations in the first stage.
     if output_path is not None:
         _output_path = _add_suffix_to_output_path(output_path, "_automatic") if annotate else output_path
-        ### CUSTOM COLORING SCRIPT ###
+        ### CUSTOM COLORING SCRIPT ### TODO: clean up
         colored_instances = np.stack([instances, instances, instances], axis=-1).astype(np.uint8)
         for i in range(1,len(np.unique(instances)) + 1):
             rand_color = np.random.randint(0, 255, 3)
