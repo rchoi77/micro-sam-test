@@ -204,3 +204,4 @@ embeddings/
 *.zarr
 
 .vscode/
+custom_models/*

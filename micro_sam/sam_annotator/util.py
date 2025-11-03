@@ -80,6 +80,10 @@ def _initialize_parser(description, with_segmentation_result=True, with_instance
         help=f"The segment anything model that will be used, one of {available_models}."
     )
     parser.add_argument(
+        "-o", "--outputpath", default=None,
+        help="The output path (filename included)."
+    )
+    parser.add_argument(
         "-c", "--checkpoint", default=None,
         help="Checkpoint from which the SAM model will be loaded loaded."
     )

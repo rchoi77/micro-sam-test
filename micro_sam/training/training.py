@@ -777,8 +777,9 @@ CONFIGURATIONS = {
 
 
 def _find_best_configuration():
+    print("Picking device...")
     if torch.cuda.is_available():
-
+        print("CUDA is available")
         # Check how much memory we have and select the best matching GPU
         # for the available VRAM size.
         _, vram = torch.cuda.mem_get_info()
@@ -786,16 +787,22 @@ def _find_best_configuration():
 
         # Maybe we can get more configurations in the future.
         if vram > 80:  # More than 80 GB: use the A100 configurations.
+            print("A100 configuration selected")
             return "A100"
         elif vram > 30:  # More than 30 GB: use the V100 configurations.
+            print("V100 configuration selected")
             return "V100"
         elif vram > 14:  # More than 14 GB: use the RTX5000 configurations.
+            print("RTX5000 configuration selected")
             return "rtx5000"
         elif vram > 8:  # More than 8 GB: use the GTX3080 configurations.
+            print("GTX3080 configuration selected")
             return "gtx3080"
         else:  # Otherwise: not enough memory to train on the GPU, use CPU instead.
+            print("Not enough memory, switch to CPU")
             return "CPU"
     else:
+        print("No GPU is available, switch to CPU")
         return "CPU"
 
 

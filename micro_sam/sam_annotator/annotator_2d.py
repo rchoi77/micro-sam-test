@@ -52,6 +52,7 @@ def annotator_2d(
     checkpoint_path: Optional[str] = None,
     device: Optional[Union[str, torch.device]] = None,
     prefer_decoder: bool = True,
+    outputpath: Optional[str] = None,
 ) -> Optional["napari.viewer.Viewer"]:
     """Start the 2d annotation tool for a given image.
 
@@ -122,10 +123,9 @@ def annotator_2d(
 
     napari.run()
 
-    instances = viewer.layers["committed_objects"].data
-
-        # Save the instance segmentation, if 'output_path' provided.
-    Image.fromarray((instances * 255).astype(np.uint8)).save("outputs/annotated.tiff", 'TIFF', quality=100)
+    if outputpath is not None:
+        instances = viewer.layers["committed_objects"].data
+        Image.fromarray(instances.astype(np.uint8)).save(outputpath, 'TIFF', quality=100) # reconsider uint8
 
 
 def main():
@@ -139,10 +139,16 @@ def main():
     else:
         segmentation_result = util.load_image_data(args.segmentation_result, key=args.segmentation_key)
 
+    if args.outputpath is None:
+        outputpath = None
+    else:
+        outputpath = args.outputpath
+
     annotator_2d(
         image, embedding_path=args.embedding_path,
         segmentation_result=segmentation_result,
         model_type=args.model_type, tile_shape=args.tile_shape, halo=args.halo,
         precompute_amg_state=args.precompute_amg_state, checkpoint_path=args.checkpoint,
-        device=args.device, prefer_decoder=args.prefer_decoder
+        device=args.device, prefer_decoder=args.prefer_decoder,
+        outputpath=outputpath
     )
