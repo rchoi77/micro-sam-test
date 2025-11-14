@@ -192,7 +192,7 @@ def _get_optimizer_and_scheduler(model_params, lr, optimizer_class, scheduler_cl
     scheduler = scheduler_class(optimizer=optimizer, **scheduler_kwargs)
     return optimizer, scheduler
 
-
+# TODO: specify type for logger_kwargs at least, maybe logger
 def train_sam(
     name: str,
     model_type: str,
@@ -220,6 +220,8 @@ def train_sam(
     verify_n_labels_in_loader: Optional[int] = 50,
     box_distortion_factor: Optional[float] = 0.025,
     overwrite_training: bool = True,
+    logger: Optional[Any] = None,
+    logger_kwargs: Optional[dict] = None,
     **model_kwargs,
 ) -> None:
     """Run training for a SAM model.
@@ -265,8 +267,13 @@ def train_sam(
         overwrite_training: Whether to overwrite the trained model stored at the same location.
             By default, overwrites the trained model at each run.
             If set to 'False', it will avoid retraining the model if the previous run was completed.
+        logger: Optionally add a custom logger for logging training metrics.
+        logger_kwargs: If using a custom logger, dictionary passing in extra logger initialization parameters. 
         model_kwargs: Additional keyword arguments for the `micro_sam.util.get_sam_model`.
     """
+    #if logger is not None:
+    #    assert(isinstance(logger, ()))
+
     with _filter_warnings(ignore_warnings):
 
         t_start = time.time()
@@ -323,7 +330,8 @@ def train_sam(
                 optimizer=optimizer,
                 device=device,
                 lr_scheduler=scheduler,
-                logger=joint_trainers.JointSamLogger,
+                logger=logger if logger is not None else joint_trainers.JointSamLogger,
+                logger_kwargs=logger_kwargs,
                 log_image_interval=100,
                 mixed_precision=True,
                 convert_inputs=convert_inputs,

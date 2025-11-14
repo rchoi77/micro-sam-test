@@ -205,3 +205,6 @@ embeddings/
 
 .vscode/
 custom_models/*
+trainingdata/*
+sampledata/*
+slurmlogs/*
