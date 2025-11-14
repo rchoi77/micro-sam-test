@@ -25,7 +25,7 @@ FilePath = Union[str, os.PathLike]
 
 # IMPORTANT: run this script directly, unexpected behavior on import
 
-# Config for 
+# Config for sweep parameters
 sweep_config = {
     "method": "random",
     "metric": {
@@ -34,13 +34,13 @@ sweep_config = {
     },
     "parameters": {
         "n_objects_per_batch": {
-            "values": [10, 25, 50]
+            "values": [10, 25]
         },
         "patch_shape": {
             "values": [(512, 512), (1024, 1024)]
         },
         "batch_size": {
-            "values": [1, 2]
+            "values": [1]
         },
         "lr": {
             "distribution": "log_uniform_values",
@@ -332,11 +332,6 @@ def run_training(
     wandb_run_notes: str,
     val_paths: Optional[Union[List[FilePath], FilePath]] = None,
     val_label_paths: Optional[Union[List[FilePath], FilePath]] = None,
-    batch_size: int = 1,
-    patch_shape: Tuple[int, int] = (512, 512),
-    n_objects_per_batch: int = 25,
-    lr: float = 1e-5,
-    n_samples: Optional[int] = None,
     wandb_config: Optional[dict] = None,
 ) -> None:
     """Run the actual model training.
@@ -369,6 +364,7 @@ def run_training(
             project=wandb_project_name,
             notes=wandb_run_notes,
         )
+    config = run.config
 
     # TODO: Preprocessing
     if True:
@@ -383,9 +379,9 @@ def run_training(
         val_paths=val_paths,
         val_label_paths=val_label_paths,
         preprocessor=_raw_transform,
-        patch_shape=patch_shape,
-        batch_size=batch_size,
-        n_samples=n_samples,
+        patch_shape=config.patch_shape,
+        batch_size=config.batch_size,
+        n_samples=config.n_samples,
     )
 
     # Run training.
@@ -400,8 +396,8 @@ def run_training(
         logger=WandBJointSamLogger,
         logger_kwargs={'wandb_run': run},
         device=device,
-        n_objects_per_batch=n_objects_per_batch,
-        lr=lr,
+        n_objects_per_batch=config.n_objects_per_batch,
+        lr=config.lr,
     )
 
     run.finish()
@@ -505,12 +501,17 @@ def main():
     train_instance_segmentation = True
 
     # WandB project settings
-    wandb_project_name = "microsam-sweep"
+    wandb_project_name = "microsam"
     wandb_run_notes = args.note
     if not args.sweep:
         # Run one training run with WandB logging
         config = {
             "lr": 0.01,
+            "batch_size": 1,
+            "patch_shape": (512, 512),
+            "n_objects_per_batch": 25,
+            "lr": 1e-5,
+            "n_samples": None,
         }
         
         run_training(
@@ -545,7 +546,7 @@ def main():
             )
 
         # Initialize sweep and run agent
-        sweep_id = wandb.sweep(sweep=sweep_config, project="microsam-sweep")
+        sweep_id = wandb.sweep(sweep=sweep_config, project=wandb_project_name)
         wandb.agent(sweep_id, function=sweep_train, count=10) # TODO: possibly change count to a user input
 
         #print(f"{'='*70}")
