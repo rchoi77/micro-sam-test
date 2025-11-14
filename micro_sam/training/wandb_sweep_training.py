@@ -14,9 +14,7 @@ from torch_em.util import load_data
 from wandb.sdk import wandb_run
 
 import micro_sam.training as sam_training
-from micro_sam.util import export_custom_sam_model
-
-from ..util import get_model_names
+from micro_sam.util import export_custom_sam_model, get_model_names
 
 import wandb
 from wandb_logger import WandBJointSamLogger

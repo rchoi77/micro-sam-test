@@ -189,6 +189,7 @@ iterative_prompting_results/
 *.png
 *.zarr
 *.sh
+*.slurm
 *.svg
 *.csv
 *.tiff
