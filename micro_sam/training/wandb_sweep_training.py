@@ -23,7 +23,10 @@ FilePath = Union[str, os.PathLike]
 
 # IMPORTANT: run this script directly, unexpected behavior on import
 
-# Config for sweep parameters
+# Config for sweep parameters TODO: maybe move to a config file and run from there?
+PROJECT_NAME = "microsam"
+PROJECT_NOTES = "No notes provided."
+SWEEP_RUN_COUNT = 5
 sweep_config = {
     "method": "random",
     "metric": {
@@ -44,6 +47,9 @@ sweep_config = {
             "distribution": "log_uniform_values",
             "min": 1e-6,
             "max": 1e-4
+        },
+        "n_samples": {
+            "values": [None]
         },
     },
 }
@@ -341,14 +347,11 @@ def run_training(
         model_type: SAM model type (vit_b, vit_l, etc.).
         train_instance_segmentation: Whether to train with segmentation decoder.
         output_path: Directory to save outputs.
+        wandb_project_name: Name of the project for WandB logging.
+        wandb_run_notes: Descriptive notes about the project for WandB logging.
         val_paths: Validation image paths.
         val_label_paths: Validation label paths.
-        batch_size: Number of images per training batch.
-        patch_shape: Size of training patches.
-        n_objects_per_batch: Number of objects sampled per batch.
-        lr: Learning rate.
-        n_samples: Number of samples per dataset (None = auto).
-        wandb_config: Optional config for WandB used when not using a sweep.
+        wandb_config: Config of hyperparameters for WandB logging.
     """
     if wandb_config:
         run = wandb.init(
@@ -383,7 +386,8 @@ def run_training(
     )
 
     # Run training.
-    device = torch.device("cuda")  # The device used for training. Notably, could be 'mps' for mac. TODO: automatic device detection
+    # possible TODO: automatic device detection — except, I don't know why you would train on anything other than cuda
+    device = torch.device("cuda")  # The device used for training. Notably, could be 'mps' for mac.
     sam_training.train_sam(
         name=checkpoint_name,
         model_type=model_type,
@@ -470,8 +474,8 @@ def main():
         "--sweep", action="store_true", default=False, help="Whether to do a WandB sweep over hyperparameter space."
     )
     parser.add_argument(
-        "-n", "--note", type=str, default="No notes provided.",
-        help=f"Note for the WandB run."
+        "-n", "--note", type=str,
+        help="Note for the WandB run. Overrides PROJECT_NOTES in script config."
     )
 
     args = parser.parse_args()
@@ -483,6 +487,8 @@ def main():
     model_type = args.model_type
     checkpoint_name = args.checkpoint_name
     output_path = args.output_path
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
 
     train_images, train_labels, val_images, val_labels = args.images, args.labels, args.val_images, args.val_labels
 
@@ -499,8 +505,8 @@ def main():
     train_instance_segmentation = True
 
     # WandB project settings
-    wandb_project_name = "microsam"
-    wandb_run_notes = args.note
+    wandb_project_name = PROJECT_NAME
+    wandb_run_notes = args.note if args.note else PROJECT_NOTES
     if not args.sweep:
         # Run one training run with WandB logging
         config = {
@@ -545,7 +551,7 @@ def main():
 
         # Initialize sweep and run agent
         sweep_id = wandb.sweep(sweep=sweep_config, project=wandb_project_name)
-        wandb.agent(sweep_id, function=sweep_train, count=10) # TODO: possibly change count to a user input
+        wandb.agent(sweep_id, function=sweep_train, count=SWEEP_RUN_COUNT)
 
         #print(f"{'='*70}")
         #print(f"SWEEP COMPLETE!")

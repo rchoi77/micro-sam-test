@@ -204,10 +204,13 @@ data/
 embeddings/
 *.zarr
 
+slurmlogs/*
+wandb/*
+
+# Custom stuff
 .vscode/
 custom_models/*
 trainingdata/*
 sampledata/*
-slurmlogs/*
 
-wandb/*
+!example_wandb_sweep.slurm
