@@ -2,7 +2,7 @@
 #SBATCH --job-name="train_microsam_model"
 #SBATCH --output="train_model.%j.%N.out"
 #SBATCH --partition=gpuA100x4
-#SBATCH --mem=80G
+#SBATCH --mem=0
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=64
