@@ -43,7 +43,7 @@ class WandBJointSamLogger(TorchEmLogger):
         self.tb.add_image(tag=f"{name}/input", img_tensor=image, global_step=step)
         self.tb.add_image(tag=f"{name}/target", img_tensor=y[selection], global_step=step)
         # samples is of size (batch size, n_obj_per_batch, C, H, W)
-        sample_grid = make_grid(samples[0][:4], nrow=2, padding=4) # Get 4 classified objects
+        sample_grid = make_grid(samples[0][:4], nrow=2, padding=4, pad_value=0.5) # Get 4 classified objects
         self.tb.add_image(tag=f"{name}/samples", img_tensor=sample_grid, global_step=step)
 
         # Custom WandB image log
